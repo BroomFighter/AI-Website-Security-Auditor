@@ -1,26 +1,32 @@
 from flask import Flask, render_template, request
+from utils.ssl_checker import check_https
 
 app = Flask(__name__)
-
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
 @app.route("/scan", methods=["POST"])
 def scan():
     website_url = request.form.get("url", "").strip()
+    
+    if not website_url:
+        return "Please provide a valid URL.", 400
 
-    # Automatically add https:// if the user left it off
-    if website_url and not (
-        website_url.startswith("http://") or website_url.startswith("https://")
-    ):
-        website_url = "https://" + website_url
+    # Run Phase 9 check
+    https_result = check_https(website_url)
 
-    # Render results back on index.html
-    return render_template("index.html", website_url=website_url)
-
+    return f"""
+    <h1>Security Audit Results</h1>
+    <p><strong>Target URL:</strong> {website_url}</p>
+    <hr>
+    <h3>HTTPS & SSL Analysis</h3>
+    <p><strong>Status:</strong> {https_result['status']}</p>
+    <p><strong>Details:</strong> {https_result['details']}</p>
+    <br>
+    <a href="/">Scan Another Website</a>
+    """
 
 if __name__ == "__main__":
     app.run(debug=True)
