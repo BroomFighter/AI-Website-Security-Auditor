@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from utils.ssl_checker import check_https
 from utils.headers import check_security_headers
+from utils.robots import check_robots_txt
 
 app = Flask(__name__)
 
@@ -26,6 +27,9 @@ def scan():
 
     # Phase 10: Security Headers Check
     header_results = check_security_headers(formatted_url)
+
+    # Phase 11: Robots.txt Check
+    robots_result = check_robots_txt(formatted_url)
 
     # Format header output for rendering
     header_html = "".join([f"<li><strong>{header}:</strong> {status}</li>" for header, status in header_results.items()])
